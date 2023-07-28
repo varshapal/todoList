@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TodoList</title>
+</head>
+<body>
+    <form onsubmit="saveToserver(event)">
+        <label>Todo Name</label>
+        <input type="text" name="name" id="todoName">
+        <label>Description</label>
+        <input type="text" name="description" id="todoDesc">
+        <button>Add Item</button>
+    </form>
+    <h4>Remaining Todos</h4>
+    <ul id="listOfItems"></ul>
+
+    <h4>Done Todos</h4>
+    <ul id="doneTodo"></ul>
+    
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"></script>
+    <script>
+
+        function saveToserver(event) {
+            event.preventDefault();
+            const todoName = event.target.name.value;
+            const todoDescription = event.target.description.value;
+
+            const obj = {todoName, todoDescription}
+
+        axios.post("https://crudcrud.com/api/a3d018fa5aa742e493801a7d14480a05/todoItems", obj)
+        .then((response) => {
+            //console.log(response);
+            showTodoListOnScreen(response.data);
+        })
+        .catch((err) => {
+            console.log(err)
+        })
+        }
+
+
+        function showTodoListOnScreen(item) {
+            const parentNode = document.getElementById('listOfItems');
+            const childNode = `<li id=${item._id}>${item.todoName} - ${item.todoDescription}
+            <button onclick = addToDoneList('${item._id}')>&#x2713;</button>
+            <button onclick = deleteItem('${item._id}')>&#x274c;</button></li>`
+            parentNode.innerHTML = parentNode.innerHTML + childNode;
+            
+
+        }
+
+        window.addEventListener("DOMContentLoaded", () => {
+            axios.get("https://crudcrud.com/api/a3d018fa5aa742e493801a7d14480a05/todoItems")
+            .then((response) => {
+                for(var i=0;i<response.data.length;i++) {
+                    showTodoListOnScreen(response.data[i]);
+                }
+            })
+            .catch((err) => {
+                console.log(err);
+            })
+        })
+
+        function deleteItem(itemId) {
+            axios.delete(`https://crudcrud.com/api/a3d018fa5aa742e493801a7d14480a05/todoItems/${itemId}`)
+            .then((response) => {
+                removeFromScreen(itemId);
+            })
+            .catch((err) => {
+                console.log(err);
+            })
+        }
+        
+
+        function removeFromScreen(itemId) {
+            const parentNode = document.getElementById('listOfItems');
+            const childNode = document.getElementById(itemId);
+            parentNode.removeChild(childNode);
+        }
+
+        
+        
+
+
+        // function showTodoOnDoneList(item) {
+        //     const parentNode = document.getElementById('doneTodo');
+        //     const childNode = `<li id=${item._id}>${item.todoName} - ${item.todoDescription}
+        //     <button>&#x2713;</button>
+        //     <button>&#x274c;</button></li>`
+        //     parentNode.innerHTML = parentNode.innerHTML + childNode;
+            
+
+        // }
+
+        function showDoneListOnScreen(item) {
+            const parentNode = document.getElementById('doneTodo');
+            const childNode = `<li id=${item._id}>${item.todoName} - ${item.todoDescription}
+            <button>&#x2713;</button>
+            <button>&#x274c;</button></li>`
+            parentNode.innerHTML = parentNode.innerHTML + childNode;
+            
+
+        }
+
+        // function update(itemId) {
+        //     axios.put(`https://crudcrud.com/api/a3d018fa5aa742e493801a7d14480a05/todoItems/${itemId}`)
+        //     .then((response) => {
+        //         addToDoneList(response.data);
+                
+        //     })
+        // }
+        function addToDoneList(itemId) {
+            const parentNode = document.getElementById('doneTodo');
+            const childNode = document.getElementById(itemId);
+            parentNode.appendChild(childNode);
+
+        
+            
+
+        }
+
+       
+    </script>
+</body>
+</html>
